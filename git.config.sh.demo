@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# settings for git backup
+
+# remote machine (you should add ssh key)
+server='gitserver'
+
+# the directory that contains repositories
+repos_dir='/repos'
+
+# location of backups on local machine
+backup_root='/backups'
+
+

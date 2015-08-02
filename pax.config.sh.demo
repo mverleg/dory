@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# settings for pax backup
+
+# location of backups on local machine
+backup_root='/backups'
+mkdir -p "$backup_root"
+
+# notification handler
+function log_success () { echo "$@" | tee ~/backups.log; }
+function log_info ()    { echo "$@" | tee ~/backups.log; }
+function log_warning () { echo "$@" | tee ~/backups.log; }
+function log_failure () { echo "$@" | tee ~/backups.log; }
+
+# which remote locations to back up
+# ...either directly:
+declare -a source_dirs=('remoteserver:/repos/repo1' 'remoteserver:/repos/repo1' 'remoteserver:/repos/repo1')
+# ...or all directories inside another one:
+source_dirs=()
+repos="$(ssh remoteserver 'cd /repo; find . -mindepth 1 -maxdepth 1 -type d ! -name skip_this_dir')"
+for repo in $repos
+do
+    source_dirs+=("remoteserver:/repos/$(basename $repo)")
+done
+
+
