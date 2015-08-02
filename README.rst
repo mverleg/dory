@@ -34,13 +34,11 @@ Recommended usage is to run this periodically from an secure and isolated machin
 Logging
 -------------------------------
 
-
-
+For logging, the code calls the functions defined in `pax.config.sh`. You can add any callbacks, emails, logfiles etc there. Backups only help if they're actually made, so it is recommended that you use some way to regularly check.
 
 Git
 -------------------------------
 
 Some code is included to pull or clone a series of git reposities automatically (default branch). This could be used, in combination with the above, if you want to backup repositories, but want normal files instead of bare repositories. Otherwise you don't need it.
-
 
 
