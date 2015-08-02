@@ -41,4 +41,9 @@ Git
 
 Some code is included to pull or clone a series of git reposities automatically (default branch). This could be used, in combination with the above, if you want to backup repositories, but want normal files instead of bare repositories. Otherwise you don't need it.
 
+License etc
+-------------------------------
+
+MIT License. Just include the licence and you can do pretty much what you want. But I am not to be held liable if something goes wrong.
+
 
