@@ -44,6 +44,6 @@ Some code is included to pull or clone a series of git reposities automatically 
 License etc
 -------------------------------
 
-MIT License. Just include the licence and you can do pretty much what you want. But I am not to be held liable if something goes wrong.
+MIT License. Just include the license and you can do pretty much what you want. But I am not to be held liable if something goes wrong.
 
 
