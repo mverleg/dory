@@ -18,7 +18,7 @@ which pax > /dev/null || log_failure "pax is not installed"
 # go to root dir
 backup_root=${backup_root%/}
 cd $backup_root || { log_failure "backup directory not found or not accessible: $backup_root"; exit 3; }
-/bin/rm -rf .tmp
+\rm -rf .tmp
 function space_use () { df -Ph "$backup_root" | tail -1 | awk '{printf $4 ; printf " / " ; print $2 ;}' ; }
 
 # check available space
@@ -59,7 +59,7 @@ do
     if [ -e "$latest_backup/$currentdirname" ]
     then
         pax -rwl "$latest_backup/$currentdirname" .tmp &&
-        /bin/mv ".tmp/$latest_backup/$currentdirname" "$new_location/$currentdirname" &&
+        \mv ".tmp/$latest_backup/$currentdirname" "$new_location/$currentdirname" &&
         printf 'symlinked "%s" from "%s" to "%s"\n' $currentdirname $latest_backup $new_location ||
             { log_failure "could not recursively symlink directories with pax: $latest_backup/$currentdirname -> $new_location/$currentdirname"; exit 7; }
     else
@@ -91,8 +91,8 @@ new_size="$(du -h -d 0 --exclude=log . | cut -f 1)"
 # check if the directory has changed
 if [[ "$old_hash" == "$new_hash" ]]
 then
-    /bin/rm -rf "$backup_root/$latest_backup"
-    echo "/bin/rm -rf $backup_root/$latest_backup"
+    \rm -rf "$backup_root/$latest_backup"
+    echo "\rm -rf $backup_root/$latest_backup"
     log_info "ran backup for ${source_dirs[0]} and ${#source_dirs[@]} others, but found no changes (old backup replaced), hash ${new_hash:0:8}..."
 else
     log_success "succesfully backed up ${source_dirs[0]} and ${#source_dirs[@]} others, size $old_size -> $new_size, hash ${new_hash:0:8}..."
