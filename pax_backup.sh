@@ -38,7 +38,7 @@ if [[ ! $backup_count -ge 1 ]];
 then
     mkdir -p "$backup_root/empty"
 fi
-latest_backup=$(ls -d -1 */ | tail -n 1) &&
+latest_backup=$(ls -d -1 */ | grep -v '^empty/*$' | tail -n 1) &&
 latest_backup=${latest_backup%/} ||
     { log_failure "could not locate latest backups: $latest_backup"; exit 4; }
 
@@ -51,7 +51,7 @@ then
 fi
 mkdir "$new_location" .tmp || { log_failure "could not create directories"; exit 6; }
 
-# for each project...
+# pax for each project
 for source_dir in "${source_dirs[@]}"
 do
     # hardlink the old location's files to the new one
@@ -65,6 +65,11 @@ do
     else
         log_info "new item added to backup: $currentdirname"
     fi
+done
+
+# rsync for each project
+for source_dir in "${source_dirs[@]}"
+do
     # find files that are unreadable to exclude them: https://unix.stackexchange.com/questions/63410/rsync-skip-files-for-which-i-dont-have-permissions
 	exclude_file=$(mktemp)
 	ssh rafiki 'cd $source_dir; find . ! -readable -o -type d ! -executable 2> /dev/null | sed "s|^\./||"' > "$exclude_file"
