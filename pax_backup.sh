@@ -70,10 +70,16 @@ done
 # rsync for each project
 for source_dir in "${source_dirs[@]}"
 do
+	server_name="$(echo $source_dir | sed 's/:.*//')"
+	local_dir="$(echo $source_dir | sed 's/.*\://')"
     # find files that are unreadable to exclude them: https://unix.stackexchange.com/questions/63410/rsync-skip-files-for-which-i-dont-have-permissions
+    printf 'finding files to exclude from "%s" on "%s"\n' "$local_dir" "$server_name"
 	exclude_file=$(mktemp)
-	ssh rafiki 'cd $source_dir; find . ! -readable -o -type d ! -executable 2> /dev/null | sed "s|^\./||"' > "$exclude_file"
+	ssh "$server_name" "find '$local_dir' -type d ! -executable 2> /dev/null | sed 's|^\./||'"   > "$exclude_file"
+	ssh "$server_name" "find '$local_dir' -type f ! -readable 2> /dev/null | sed 's|^\./||'" >> "$exclude_file"
+	printf 'excluding %d files from "%s" (see "%s")\n' "$(cat $exclude_file | wc -l)" "$local_dir" "$exclude_file"
     # sync this with the target directory, incl. delete
+    printf 'copying changed files from "%s"\n' "$source_dir"
 	source_dir=${source_dir%/} &&
 	rsync -arzphH -e ssh --delete --checksum --verbose --exclude-from="$exclude_file" $source_dir $new_location &&
 	printf '"%s" now contains a clone of "%s"\n\n' $new_location $source_dir ||
