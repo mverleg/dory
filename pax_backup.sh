@@ -38,7 +38,9 @@ if [[ ! $backup_count -ge 1 ]];
 then
     mkdir -p "$backup_root/empty"
 fi
-latest_backup=$(ls -d -1 */ | grep -v '^empty/*$' | tail -n 1) &&
+
+# latest_backup=$(ls -d -1 */ | grep -v '^empty/*$' | tail -n 1) &&
+latest_backup=$(ls -d -1 */ | tail -n 1) &&
 latest_backup=${latest_backup%/} ||
     { log_failure "could not locate latest backups: $latest_backup"; exit 4; }
 
@@ -74,8 +76,8 @@ do
 	local_dir="$(echo $source_dir | sed 's/.*\://')"
     # find files that are unreadable to exclude them: https://unix.stackexchange.com/questions/63410/rsync-skip-files-for-which-i-dont-have-permissions
     printf 'finding files to exclude from "%s" on "%s"\n' "$local_dir" "$server_name"
-	exclude_file=$(mktemp)
-	ssh "$server_name" "find '$local_dir' -type d ! -executable 2> /dev/null | sed 's|^\./||'"   > "$exclude_file"
+	exclude_file=$(mktemp).ignore
+	ssh "$server_name" "find '$local_dir' -type d ! -executable 2> /dev/null | sed 's|^\./||'" > "$exclude_file"
 	ssh "$server_name" "find '$local_dir' -type f ! -readable 2> /dev/null | sed 's|^\./||'" >> "$exclude_file"
 	printf 'excluding %d files from "%s" (see "%s")\n' "$(cat $exclude_file | wc -l)" "$local_dir" "$exclude_file"
     # sync this with the target directory, incl. delete
