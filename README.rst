@@ -9,6 +9,8 @@ This code, although short, makes quite useful incremental backups.
 
 This will leave you with a complete copy of whatever you're trying to backup, for every time you use this script. Files only take significant space if they're changed (since they're just hardlinks otherwise).
 
+It runs on a backup machine (like a raspberry pi or a server with extra space) and makes backups over ssh.
+
 * Need your backed up data? Just go to the latest backup directory.
 * Need an earlier version? Go to an earlier directory, or use diff to find where changes happened.
 
@@ -18,6 +20,7 @@ Other features:
 * Lists unreadable files, then skips them gracefully.
 * Easy to add logging hooks on success, failure, etc.
 * Makes log entry about changes & available space.
+* If a backup stops halfway, half the files are secure, and running again only only does the other half.
 
 The code
 -------------------------------
