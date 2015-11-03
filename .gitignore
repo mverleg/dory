@@ -2,3 +2,5 @@
 *.pyc
 local.sh
 *.config.sh
+*.swp
+
