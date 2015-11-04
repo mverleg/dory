@@ -19,7 +19,7 @@ which pax > /dev/null || log_failure "pax is not installed"
 wd=$(pwd)
 backup_root=${backup_root%/}
 cd $backup_root || { log_failure "backup directory not found or not accessible: $backup_root"; exit 3; }
-\rm -rf .tmp
+rm -rf "$backup_root/.tmp"
 function space_use () { df -Ph "$backup_root" | tail -1 | awk '{printf $4 ; printf " / " ; print $2 ;}' ; }
 
 # check available space
@@ -61,7 +61,8 @@ do
     currentdirname="$(basename $source_dir)"
     if [ -e "$latest_backup/$currentdirname" ]
     then
-        pax -rwl "$latest_backup/$currentdirname" .tmp &&
+        # pax info (can't find where I learned about it initially): http://unix.stackexchange.com/a/202435/56576
+        pax -rwlpe "$latest_backup/$currentdirname" .tmp &&
         \mv ".tmp/$latest_backup/$currentdirname" "$new_location/$currentdirname" &&
         printf 'symlinked "%s" from "%s" to "%s"\n' $currentdirname $latest_backup $new_location ||
             { log_failure "could not recursively symlink directories with pax: $latest_backup/$currentdirname -> $new_location/$currentdirname"; exit 7; }
@@ -69,6 +70,7 @@ do
         log_info "new item added to backup: $currentdirname"
     fi
 done
+rm -rf .tmp
 
 # rsync for each project
 for source_dir in "${source_dirs[@]}"
@@ -136,6 +138,6 @@ done
 printf "\n"; cat "$logfile"
 
 # remove empty dir if it exists
-rm -rf "$backup_root/empty" "$backup_root/.tmp"
+rm -rf "$backup_root/empty"
 
 
