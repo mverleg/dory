@@ -16,6 +16,7 @@ which pax > /dev/null || log_failure "pax is not installed"
 { which rsync && which pax; } > /dev/null || exit 9
 
 # go to root dir
+wd=$(pwd)
 backup_root=${backup_root%/}
 cd $backup_root || { log_failure "backup directory not found or not accessible: $backup_root"; exit 3; }
 \rm -rf .tmp
@@ -73,13 +74,26 @@ done
 for source_dir in "${source_dirs[@]}"
 do
 	server_name="$(echo $source_dir | sed 's/:.*//')"
-	local_dir="$(echo $source_dir | sed 's/.*\://')"
+	remote_dir="$(echo $source_dir | sed 's/.*\://')"
     # find files that are unreadable to exclude them: https://unix.stackexchange.com/questions/63410/rsync-skip-files-for-which-i-dont-have-permissions
-    printf 'finding files to exclude from "%s" on "%s"\n' "$local_dir" "$server_name"
+    printf 'finding unreadable files to exclude from "%s" on "%s"\n' "$remote_dir" "$server_name"
 	exclude_file=$(mktemp).ignore
-	ssh "$server_name" "find '$local_dir' -type d ! -executable 2> /dev/null | sed 's|^\./||'" > "$exclude_file"
-	ssh "$server_name" "find '$local_dir' -type f ! -readable 2> /dev/null | sed 's|^\./||'" >> "$exclude_file"
-	printf 'excluding %d files from "%s" (see "%s")\n' "$(cat $exclude_file | wc -l)" "$local_dir" "$exclude_file"
+	ssh "$server_name" "find '$remote_dir' -type d ! -executable 2> /dev/null | sed 's|^\./||'" > "$exclude_file"
+	ssh "$server_name" "find '$remote_dir' -type f ! -readable 2> /dev/null | sed 's|^\./||'" >> "$exclude_file"
+	if $skip_hidden_dirs
+	then
+	    printf 'finding hidden directories to exclude from "%s" on "%s"\n' "$remote_dir" "$server_name"
+	    # find all the hidden directories then add both directory and directory/*
+	    ssh "$server_name" "find '$remote_dir' -type d -name '.*' 2> /dev/null | sed -e 's/\(.*\)$/\1\n\1\/*/'" >> "$exclude_file"
+	fi
+	# make paths relative or it doesn't work
+	while read line
+	do
+        python -c "import os.path; print os.path.relpath('$line', '$remote_dir')" >> "$exclude_file.rel"
+
+	done < "$exclude_file"
+	exclude_file="$exclude_file.rel"
+	printf 'excluding %d files from "%s" (see "%s")\n' "$(cat $exclude_file | wc -l)" "$remote_dir" "$exclude_file"
     # sync this with the target directory, incl. delete
     printf 'copying changed files from "%s"\n' "$source_dir"
 	source_dir=${source_dir%/} &&
@@ -87,31 +101,41 @@ do
 	printf '"%s" now contains a clone of "%s"\n\n' $new_location $source_dir ||
         { log_failure "could not sync directories: $source_dir -> $new_location"; exit 8; }
 done
+cd "$wd"
 
 # create hash of the directory
 cd "$backup_root/$latest_backup"
 old_hash="$(find . -type f ! -name 'log' -print0 | sort -z | xargs -0 sha1sum -b | sha1sum | cut -f 1 -d ' ')"
 old_size="$(du -h -d 0  --exclude=log . | cut -f 1)"
+cd "$wd"
 cd "$backup_root/$new_location"
 new_hash="$(find . -type f ! -name 'log' -print0 | sort -z | xargs -0 sha1sum -b | sha1sum | cut -f 1 -d ' ')"
 new_size="$(du -h -d 0 --exclude=log . | cut -f 1)"
+cd "$wd";
 
 # check if the directory has changed
 if [[ "$old_hash" == "$new_hash" ]]
 then
     \rm -rf "$backup_root/$latest_backup"
-    echo "\rm -rf $backup_root/$latest_backup"
     log_info "ran backup for ${source_dirs[0]} and ${#source_dirs[@]} others, but found no changes (old backup replaced), hash ${new_hash:0:8}..."
 else
-    log_success "succesfully backed up ${source_dirs[0]} and ${#source_dirs[@]} others, size $old_size -> $new_size, hash ${new_hash:0:8}..."
+    log_success "successfully backed up ${source_dirs[0]} and ${#source_dirs[@]} others, size $old_size -> $new_size, hash ${new_hash:0:8}..."
 fi
 
 # log some info
-printf "%s\nold   %s   %s   %s\nnew   %s   %s   %s\nspace left: %s\n\n" "$(date +'%y-%m-%d %H:%M:%S')" "$old_size" "$old_hash" "$latest_backup" "$new_size" "$new_hash" "$new_location" "$(space_use)" > "$backup_root/$new_location/log"
-for source_dir in "${source_dirs[@]}"; do echo "$source_dir" >> "$backup_root/$new_location/log"; done
-printf "\n"; cat "$backup_root/$new_location/log"
+logfile="$backup_root/$new_location/log"
+date +'%y-%m-%d %H:%M:%S' > "$logfile"
+printf "old   %s   %s   %s\n" "$old_size" "$old_hash" "$latest_backup" >> "$logfile"
+printf   "new   %s   %s   %s\n" "$new_size" "$new_hash" "$new_location" >> "$logfile"
+printf "space left: %s\nthis is a generated logfile and not part of the backup\n\n" "$(space_use)" >> "$logfile"
+
+for source_dir in "${source_dirs[@]}"
+do
+    echo "$source_dir" >> "$logfile"
+done
+printf "\n"; cat "$logfile"
 
 # remove empty dir if it exists
-rm -rf "$backup_root/empty"
+rm -rf "$backup_root/empty" "$backup_root/.tmp"
 
 

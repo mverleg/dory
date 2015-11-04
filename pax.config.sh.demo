@@ -23,4 +23,6 @@ do
     source_dirs+=("remoteserver:/repos/$(basename $repo)")
 done
 
+skip_hidden_dirs=true
+
 

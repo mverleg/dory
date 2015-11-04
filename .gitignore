@@ -3,4 +3,4 @@
 local.sh
 *.config.sh
 *.swp
-
+test_target/unreadable.txt
