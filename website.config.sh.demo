@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# settings for website status checker
+
+# failure notification
+function notify_problem () { >&2 printf "$@\n"; }
+
+# which pages to check
+declare -a websites=('https://www.google.nl/' 'https://en.wikipedia.org/wiki/Main_Page')
+
+
