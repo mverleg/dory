@@ -80,7 +80,8 @@ do
     # find files that are unreadable to exclude them: https://unix.stackexchange.com/questions/63410/rsync-skip-files-for-which-i-dont-have-permissions
     printf 'finding unreadable files to exclude from "%s" on "%s"\n' "$remote_dir" "$server_name"
 	exclude_file=$(mktemp).ignore
-	ssh "$server_name" "find '$remote_dir' -type d ! -executable 2> /dev/null | sed 's|^\./||'" > "$exclude_file"
+	printf "__pycache__\n*.pyc\n*~\n" > "$exclude_file"  # some initial value so it's created
+	ssh "$server_name" "find '$remote_dir' -type d ! -executable 2> /dev/null | sed 's|^\./||'" >> "$exclude_file"
 	ssh "$server_name" "find '$remote_dir' -type f ! -readable 2> /dev/null | sed 's|^\./||'" >> "$exclude_file"
 	if $skip_hidden_dirs
 	then
