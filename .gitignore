@@ -1,10 +1,12 @@
 *
-!paxsync.inc.sh
-!db_dump.inc.sh
-!git_nonbare.inc.sh
+!inc_paxsync.sh
+!inc_db_dump.sh
+!inc_git_nonbare.sh
+!inc_utils.sh
 !run_paxsync.sh.demo
 !run_db_dumps.sh.demo
 !run_git_nonbare.sh.demo
+!conf_logging.sh.demo
 !test_target/syncme.txt
 !test_target/.gitlike/skipme.txt
 !LICENSE.txt
