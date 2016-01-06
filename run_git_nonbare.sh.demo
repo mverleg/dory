@@ -1,60 +1,19 @@
 #!/bin/bash
 
-# make sure you have git
+# requirements
+source conf_logging.sh
+source inc_git_nonbare.sh
 
-dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+# go to backups directory
+mkdir -p /backup_dir/
+cd /backup_dir/
 
-# get settings from git.config.sh (outside git) if it exists
-server='gitserver'
-repos_dir='/repos'
-backup_root='/backup'
+# list all repos in a remote directory
+repos="$(get_bare_git_repos /remoterepodir remotehost)"
+log_info "found $server repositories: $(echo $repos)"
 
-if [ -a "$dir/git.config.sh" ]
-then
-	source "$dir/git.config.sh"
-else
-	printf 'please create a git.config.sh file containing settings\n'
-	exit
-fi
-
-# preparation
-mkdir -p "$backup_root"
-cd "$backup_root"
-if [ -z "$server" ]
-then
-	# local backup
-	repos=$(/bin/ls "$repos_dir")
-else
-	repos=$(ssh "$server" "/bin/ls $repos_dir")
-fi
-
-# pull or clone all the repositories found
-for repo in $repos;
-do
-	if [ -e "$repo" ];
-	then
-		if [ -e "$repo/.git" ];
-		then
-			printf '%s exists; pulling\n' "$repo";
-			cd "$repo";
-			git pull;
-			cd ..;
-		else
-			printf '%s exists but is not a git directory! skipping\n' "$repo" >&2;
-		fi
-	else
-		printf '%s new; cloning\n' "$repo";
-		if [ -z "$server" ];
-		then
-			git clone "$repos_dir/$repo";
-		else
-			git clone "$server:$repos_dir/$repo";
-		fi;
-	fi;
-done;
-
-# that was simple
-printf 'done!\n';
-
+# pull all those repositories into pwd
+pull_clone_repos "$repos" "/remoterepodir" "remotehost"
+log_success "git pull & clone from $server completed"
 
 
