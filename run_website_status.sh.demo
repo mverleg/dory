@@ -4,15 +4,15 @@
 source inc_website_status.sh
 
 # list the websites
-declare -a websites=('https://www.google.com/' 'https://markv.nl' 'http://verleg.net')
+declare -a webpages=('https://www.google.com/stuff/sub?param=value&other=st_u-f.f' 'https://markv.nl' 'http://verleg.net')
 
 # build notification function
 function notify_problem ()
 {
-    echo "PROBLEM! $1";
+    printf "PROBLEM! $1";
 }
 
 # find the statuses and notify
-get_websites_statuses websites[@]
+get_websites_statuses webpages[@]
 
 

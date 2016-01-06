@@ -52,7 +52,7 @@ function do_pax_sync_all()
 	    declare -a from_dirs=( "${source_dirs[@]}" );
 	else
         log_failure "source_dirs variable not set, needed by pax sync\n"
-        return
+        return 1
 	fi
 	if [ -z "$from_dirs" ]; then log_failure "from_dirs variable not set, needed by pax sync\n"; return; fi
 	if ! which pax 1> /dev/null ;   then log_failure   "pax not installed! aborting"; return 2; fi

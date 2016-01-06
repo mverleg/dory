@@ -48,14 +48,27 @@ function is_low_diskspace ()
 function make_path_relative ()
 {
 	#
-	# Make a path $1 relative to another $2
+	# Make a path $1 relative to another $2.
 	#
 	if [ -z "$2" ]; then log_warning "make_path_relative needs two arguments: current path and base path"; return 1; fi
 	python -c "import os.path; print '\n'.join([os.path.relpath(p, '$2') if p.startswith('/') else p for p in '''$1'''.splitlines()])"
-	#for pth in $1
-	#do
-	#    python -c "import os.path; print os.path.relpath('$pth', '$2') if '$pth'.startswith('/') else '$pth'"
-	#done
 }
 
-
+function file_age_less_than ()
+{
+	#
+	# Check if file $1 is less old than $2 (or 1 day if not set).
+	# If the file doesn't exist, it'll be treated as expired (since this is for lock files).
+	#
+	if [ ! -e "$1" ]
+	then
+        return 1  # not found, treated as young
+	fi
+	if [ -n "$2" ]; then expire_age=$2; else expire_age=1439; fi
+	if [ $(expr $(date +%s) - $(stat -c %Y $1)) -lt $expire_age ]
+	then
+		return 0  # still good
+	else
+		return 1  # expired
+	fi
+}
