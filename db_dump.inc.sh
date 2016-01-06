@@ -159,46 +159,5 @@ function dump_all_dbs ()
 	dump_all_postgres
 }
 
-#function make_db_dumps ()
-#{
-#	timestamp=$(date +"%Y-%m-%d-%H-%M")
-#
-#	if [ $(which mysql) ]
-#	then
-#		printf "MySQL: found at %s\n" $(which mysql)
-#		databases=
-#		echo "found databases: $databases"
-#	else
-#		printf "MySQL: not found; skip\n"
-#	fi
-#	if [ $(which psql) ]
-#	then
-#		printf "postgres: found at %s\n" $(which psql)
-#	else
-#		printf "postgres: not found; skip\n"
-#	fi
-#
-#	for db in $mysql_databases
-#	do
-#		fname="${db}_$timestamp.db.sql"
-#		echo "$db -> $fname"
-#
-#		# find previous backups
-#		last=$(find . -maxdepth 1 -type f -name "${db}_*.sql" -printf '%Ts\t%p\n' | sort -nr | cut -f2 | head -n 1)
-#
-#		# dump the sql to a file, but strip the timestamp, so that it will be equal of no data changed
-#		echo mysqldump --user=$user --password=$password --database $db | head -n -1 > "$fname"
-#
-#		if [ -e "$last" ]
-#		then
-#			echo "compare $fname to $last"
-#			if cmp --silent "$fname" "$last"
-#			then
-#				rm -f "$fname"
-#				touch "${db}_$timestamp.db.unchanged"
-#			fi
-#		fi
-#	done
-#}
-#
-#
+
+
