@@ -1,0 +1,28 @@
+#!/bin/bash
+
+#
+# Make pax+rsync backups using the code in paxsync.inc.sh
+#
+
+# notification handler
+source logging.conf.sh
+
+# location of backups on local machine
+backup_root='/backups'
+
+# which remote locations to back up
+# ...either directly:
+# declare -a source_dirs=('remoteserver:/repos/repo1' 'remoteserver:/repos/repo2' 'ALTserver:/repos/repo3')
+# ...or all directories inside another one:
+source_dirs=()
+dirs="$(ssh remoteserver 'cd /repos; find . -mindepth 1 -maxdepth 1 -type d ! -name skip_this_dir')"
+for dr in $dirs
+do
+    source_dirs+=("remoteserver:/repos/$(basename $repo)")
+done
+
+# execute the sync
+source paxsync.inc.sh
+do_pax_sync_all "$backup_root" true source_dirs[@]
+
+
