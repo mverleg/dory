@@ -8,10 +8,10 @@
 #
 
 # notification handler
-source logging.conf.sh
+source conf_logging.sh
 
 # run the dumps
-source db_dump.inc.sh
+source inc_db_dump.sh
 #dump_all_mysql
 #dump_all_postgres
 dump_all_dbs

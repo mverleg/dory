@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source utils.inc.sh
+source inc_utils.sh
 
 function find_exclude_paths ()
 {
