@@ -1,6 +1,7 @@
-*~
-*.pyc
-local.sh
-*.config.sh
-*.swp
-test_target/unreadable.txt
+*
+!*.sh.demo
+!*.inc.sh
+!test_target/
+!LICENSE.txt
+!README.rst
+!.gitignore
