@@ -39,7 +39,7 @@ function do_pax_sync_all()
 	# check input
 	if ! (type -t "log_success" 1> /dev/null && type -t "log_info" 1> /dev/null && type -t "log_warning" 1> /dev/null && type -t "log_failure" 1> /dev/null)
 	then
-		printf "logging functions not set; aborting" >&2; return;
+		printf "logging functions not set; aborting" >&2; return 1;
 	fi
 	if [ -n "$1" ]; then backup_root="$1"; fi
 	if [ -n "$2" ]; then skip_hidden_dirs="$2"; else skip_hidden_dirs=false; fi
@@ -54,14 +54,14 @@ function do_pax_sync_all()
         return
 	fi
 	if [ -z "$from_dirs" ]; then log_failure "from_dirs variable not set, needed by pax sync\n"; return; fi
-	if ! which pax 1> /dev/null ;   then log_failure   "pax not installed! aborting"; return; fi
-	if ! which rsync 1> /dev/null ; then log_failure "rsync not installed! aborting"; return; fi
+	if ! which pax 1> /dev/null ;   then log_failure   "pax not installed! aborting"; return 2; fi
+	if ! which rsync 1> /dev/null ; then log_failure "rsync not installed! aborting"; return 2; fi
 
 	# go to root dir
 	wd=$(pwd)
 	backup_root=${backup_root%/}
 	mkdir -p "$backup_root"
-	cd $backup_root || { log_failure "backup directory not found or not accessible: $backup_root"; return; }
+	cd $backup_root || { log_failure "backup directory not found or not accessible: $backup_root"; return 3; }
 	rm -rf "$backup_root/.tmp"
 
 	# check available space
