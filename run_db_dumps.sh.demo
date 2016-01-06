@@ -1,0 +1,19 @@
+#!/bin/bash
+
+#
+# Make dumps of all non-administrative database tables for MySQL and postgres
+#
+# You will need to set up a ~/my.cnf file with credentials for MySQL
+#   and/or a ~/.pgpass file with credentials for postgres.
+#
+
+# notification handler
+source logging.conf.sh
+
+# run the dumps
+source db_dump.inc.sh
+#dump_all_mysql
+#dump_all_postgres
+dump_all_dbs
+
+

@@ -35,7 +35,7 @@ Usage has been updated! Change your code!
 
 Some familiarity with bash scripting is required.
 
-There are multiple ways to use the code. A simple one for `paxsync` is as follows::
+There are multiple ways to use the code. A simple one for `paxsync` is as follows:
 
 * Copy `run_paxsync.sh.demo` to `run_paxsync.sh`.
 * Add what you want to backup (`source_dirs`) and where to (`backup_root`) in this file.
