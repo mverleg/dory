@@ -5,7 +5,7 @@
 #
 
 # notification handler
-source logging.conf.sh
+source conf_logging.sh
 
 # location of backups on local machine
 backup_root='/backups'
