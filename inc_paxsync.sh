@@ -39,7 +39,8 @@ function do_pax_sync_all()
 	# check input
 	if ! (type -t "log_success" 1> /dev/null && type -t "log_info" 1> /dev/null && type -t "log_warning" 1> /dev/null && type -t "log_failure" 1> /dev/null)
 	then
-		printf "logging functions not set; aborting" >&2; return 1;
+		log_failure "logging functions not set; aborting"
+		return 1
 	fi
 	if [ -n "$1" ]; then backup_root="$1"; fi
 	if [ -n "$2" ]; then skip_hidden_dirs="$2"; else skip_hidden_dirs=false; fi
@@ -130,12 +131,13 @@ function do_pax_sync_all()
 			find_exclude_paths "$dir_path" $skip_hidden_dirs >> "$exclude_file"
 		fi
 		# make paths relative or it doesn't work
-		while read line
-		do
-			python -c "import os.path; print os.path.relpath('$line', '$dir_path') if '$line'.startswith('/') else '$line'" >> "$exclude_file.rel"
-
-		done < "$exclude_file"
-		exclude_file="$exclude_file.rel"
+		make_path_relative "$(cat $exclude_file)" "$dir_path" >> "$exclude_file"
+#		while read line
+#		do
+#		    make_path_relative "$line" "$dir_path" >> "$exclude_file.rel"
+#
+#		done < "$exclude_file"
+		#exclude_file="$exclude_file.rel"
 		printf 'excluding %d files from "%s" (see "%s")\n' "$(cat $exclude_file | wc -l)" "$dir_path" "$exclude_file"
 		# sync this with the target directory, incl. delete
 		printf 'copying changed files from "%s"\n' "$source_dir"

@@ -125,6 +125,11 @@ function dump_all_mysql ()
 	#
 	# Using the above functions, dump all MySQL databases that have changed.
 	#
+	if ! (type -t "log_success" 1> /dev/null && type -t "log_info" 1> /dev/null && type -t "log_warning" 1> /dev/null && type -t "log_failure" 1> /dev/null)
+	then
+		log_failure "logging functions not set; aborting"
+		return 1
+	fi
 	get_mysql_databases || return 1
 	for db in $mysql_databases
 	do
@@ -140,6 +145,10 @@ function dump_all_postgres ()
 	#
 	# Using the above functions, dump all postgres databases that have changed.
 	#
+	if ! (type -t "log_success" 1> /dev/null && type -t "log_info" 1> /dev/null && type -t "log_warning" 1> /dev/null && type -t "log_failure" 1> /dev/null)
+	then
+		printf "logging functions not set; aborting" >&2; return 1;
+	fi
 	get_postgres_databases || return 1
 	for db in $postgres_databases
 	do

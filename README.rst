@@ -48,7 +48,7 @@ An advantage of this setup is that backups happen from a separate machine. If th
 Logging
 -------------------------------
 
-For logging, the code calls the functions defined in `logging.conf.sh`. You can add any callbacks, emails, logfiles etc there. Backups only help if they're actually made, so it is recommended that you use some way to check regularly.
+For logging, the code calls the functions defined in `conf_logging.sh`. You can add any callbacks, emails, logfiles etc there. Backups only help if they're actually made, so it is recommended that you use some way to check regularly.
 
 Git
 -------------------------------
