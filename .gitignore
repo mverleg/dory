@@ -1,6 +1,7 @@
 *
 !*.sh.demo
 !*.inc.sh
+!*.conf.sh
 !test_target/
 !LICENSE.txt
 !README.rst
