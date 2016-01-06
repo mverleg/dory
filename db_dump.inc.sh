@@ -117,6 +117,7 @@ function handle_raw_db_dump ()
 	else
 		printf "this seems to be the first dump\n"
 	fi
+	dumpsize=$(($(stat --printf='%s' $newname)/1048576))
 }
 
 function dump_all_mysql ()
@@ -129,9 +130,9 @@ function dump_all_mysql ()
 	do
 		do_mysql_dump "$db" &&
 		handle_raw_db_dump "$dumppath" &&
-		log_info "dumped MySQL $db to $dumppath ($(($(stat --printf=\"%s\" \"$dumppath\")/1048576))) Mb"
+		log_info "dumped MySQL $db to $newname ($dumpsize Mb)"
 	done
-	log_success "MySQL done: $mysql_databases"
+	log_success "MySQL done: $(echo $mysql_databases)"
 }
 
 function dump_all_postgres ()
@@ -144,9 +145,9 @@ function dump_all_postgres ()
 	do
 		do_postgres_dump "$db" &&
 		handle_raw_db_dump "$dumppath" &&
-		log_info "dumped postgres $db to $dumppath ($(($(stat --printf="%s" "$dumppath")/1048576))) Mb"
+		log_info "dumped postgres $db to $dumppath ($dumpsize Mb)"
 	done
-	log_success "postgres done: $postgres_databases"
+	log_success "postgres done: $(echo $postgres_databases)"
 }
 
 function dump_all_dbs ()
