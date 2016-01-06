@@ -129,7 +129,7 @@ function dump_all_mysql ()
 	do
 		do_mysql_dump "$db" &&
 		handle_raw_db_dump "$dumppath" &&
-		log_info "dumped MySQL $db to $dumppath ($(($(stat --printf="%s" "$dumppath")/1048576))) Mb"
+		log_info "dumped MySQL $db to $dumppath ($(($(stat --printf=\"%s\" \"$dumppath\")/1048576))) Mb"
 	done
 	log_success "MySQL done: $mysql_databases"
 }
