@@ -22,6 +22,7 @@ Other features:
 * Makes log entry about changes & available space.
 * If a backup stops halfway, half the files are secure, and running again only only does the other half.
 * Conveniently handle git repositories and databases (MySQL/postgres).
+* Rather unrelated, it can also monitor webpage statuses and call a function if a page goes down.
 
 The code
 -------------------------------

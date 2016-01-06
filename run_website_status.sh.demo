@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# requirements
+source inc_website_status.sh
+
+# list the websites
+declare -a websites=('https://www.google.com/' 'https://markv.nl' 'http://verleg.net')
+
+# build notification function
+function notify_problem ()
+{
+    echo "PROBLEM! $1";
+}
+
+# find the statuses and notify
+get_websites_statuses websites[@]
+
+
