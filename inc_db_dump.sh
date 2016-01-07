@@ -4,6 +4,8 @@
 # Make a dump of database tables
 #
 
+source inc_utils.sh
+
 function get_mysql_databases ()
 {
 	#
@@ -183,14 +185,4 @@ function remote_dump_all_dbs ()
     if [ -n "$(cat /tmp/remote_dump.out)" ]; then log_info "remote dump:\n$(cat /tmp/remote_dump.out)"; fi
     if [ -n "$(cat /tmp/remote_dump.err)" ]; then log_failure "remote dump:\n$(cat /tmp/remote_dump.err)"; fi
 }
-
-# dummy logging functions for remote host
-function dummy_logs ()
-{
-	function log_success () { printf "$@\n"; }
-	function log_info    () { printf "$@\n"; }
-	function log_warning () { printf "$@\n" 1>&2; }
-	function log_failure () { printf "$@\n" 1>&2; }
-}
-
 

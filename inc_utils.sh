@@ -72,3 +72,14 @@ function file_age_less_than ()
 		return 1  # expired
 	fi
 }
+
+# dummy logging functions for remote host
+function dummy_logs ()
+{
+	function log_success () { printf "$@\n"; }
+	function log_info    () { printf "$@\n"; }
+	function log_warning () { printf "$@\n" 1>&2; }
+	function log_failure () { printf "$@\n" 1>&2; }
+}
+
+
