@@ -108,7 +108,7 @@ function remote_find_and_clone ()
 	repos="$(get_bare_git_repos $source_dir $server)"
 	printf "repos found: $(echo $repos)\n"
 	printf "pulling/cloning from $server:$source_dir to $server:$target_dir\n"
-	total=0
+	total=0 #; for repo in $repos; do ((total+=1)); done
 	success=0
 	for repo in $repos
 	do
@@ -118,12 +118,13 @@ function remote_find_and_clone ()
 		if [ -n "$(cat /tmp/remote_dump.out)" ]; then ((success+=1)); printf "remote pullclone output for $repo: $(cat /tmp/remote_dump.out)\n"; fi
         if [ -n "$(cat /tmp/remote_dump.err)" ]; then log_failure "remote pullclone errors for $repo: $(cat /tmp/remote_dump.err)"; fi
 		((total+=1))
-		if [ "$success" -lt "$total" ]; then 
-			log_failure "git pullclone summary: only $success / $total completed without errors (stderr)"
-		else	
-			log_success "git pullclone summary: all $success / $total completed without errors (stderr)"
-		fi
 	done
+	if [ "$success" -lt "$total" ]; then 
+		log_failure "git pullclone summary: only $success / $total completed without errors (stderr)"
+	else	
+		log_success "git pullclone summary: all $success / $total completed without errors (stderr)"
+	fi
 }
+
 
 
