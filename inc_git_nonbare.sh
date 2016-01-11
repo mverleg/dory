@@ -115,8 +115,13 @@ function remote_find_and_clone ()
 		# pull_clone_one_repo "$repo" "$repos_dir" "$server"
 		ssh "$server" "$code; dummy_logs; mkdir -p \"$target_dir\"; cd \"$target_dir\"; pull_clone_one_repo \"$repo\" \"$source_dir\" \"\"" \
 		    1> /tmp/remote_dump.out 2> /tmp/remote_dump.err
-		if [ -n "$(cat /tmp/remote_dump.out)" ]; then ((success+=1)); printf "remote pullclone output for $repo: $(cat /tmp/remote_dump.out)\n"; fi
-        if [ -n "$(cat /tmp/remote_dump.err)" ]; then log_failure "remote pullclone errors for $repo: $(cat /tmp/remote_dump.err)"; fi
+        if grep failed "/tmp/remote_dump.err" 1> /dev/null
+        then
+			log_failure "remote pullclone errors for $repo: $(cat /tmp/remote_dump.err)"
+		else
+			printf "remote pullclone output & errors for $repo:\n$(cat /tmp/remote_dump.out)\n$(cat /tmp/remote_dump.err)\n"
+			((success+=1))
+		fi
 		((total+=1))
 	done
 	if [ "$success" -lt "$total" ]; then 
@@ -125,6 +130,5 @@ function remote_find_and_clone ()
 		log_success "git pullclone summary: all $success / $total completed without errors (stderr)"
 	fi
 }
-
 
 
