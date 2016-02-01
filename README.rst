@@ -13,6 +13,7 @@ It runs on a backup machine (like a server with extra space) and makes backups o
 
 * Need your backed up data? Just go to the latest backup directory.
 * Need an earlier version? Go to an earlier directory, or use diff to find where changes happened.
+* Need to clear some space? Just delete some backups; all other ones remain functional thanks to hardlinks.
 
 Other features:
 
