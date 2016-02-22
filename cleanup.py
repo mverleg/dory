@@ -1,5 +1,6 @@
 
 from argparse import ArgumentParser
+from collections import OrderedDict
 from datetime import datetime, timedelta
 from os import listdir
 from os.path import join
@@ -19,21 +20,22 @@ def find_backups(dir, dry=True):
 				yield name, dt
 
 
-def remove(days, which, dir):
-	print('remove {0:}'.format(days[which][0] or days[which][1]))
-	if days[which][0]:
-		budir = join(dir, days[which][0])
+def remove(backups, which, dir, is_removed):
+	print('remove {0:}'.format(backups[which][0] or backups[which][1]))
+	if backups[which][0]:
+		budir = join(dir, backups[which][0])
 		rmtree(budir)
-	days.pop(which)
+	is_removed[backups[which]] = True
+	backups.pop(which)
 
 
-def get_scores(days, now):
-	diffs = [0] * len(days)
-	ago = [0] * len(days)
-	for k, day1 in enumerate(days):
+def get_scores(backups, now):
+	diffs = [0] * len(backups)
+	ago = [0] * len(backups)
+	for k, day1 in enumerate(backups):
 		age = abs((now - day1[1]).total_seconds()) / 86400
 		ago[k] = age
-		for day2 in days:
+		for day2 in backups:
 			diff = abs(int((day1[1] - day2[1]).total_seconds()))
 			if diff > 0:
 				score = 1.e6 / diff
@@ -69,9 +71,10 @@ def prune(args):
 	now = datetime.now()
 
 	if args.demo is not None:
-		days = [(None, now - timedelta(days=int((0.03 * randint(0, int(100)))**4), seconds=randint(0, 86400))) for k in range(args.demo)]
+		backups = [(None, now - timedelta(days=int((0.03 * randint(0, int(100)))**4), seconds=randint(0, 86400))) for k in range(args.demo)]
 	else:
-		days = list(find_backups(args.directory, args.dry))
+		backups = list(find_backups(args.directory, args.dry))
+	is_removed = OrderedDict((backup, False) for backup in sorted(backups))
 
 	fig = ax = mp = None
 	if args.plot:
@@ -80,22 +83,26 @@ def prune(args):
 		ax.set_xlabel('Days ago')
 		ax.set_ylabel('Redundancy score')
 		ax.set_yscale('log')
-		original_ago, original_scores = get_scores(days, now)
+		original_ago, original_scores = get_scores(backups, now)
 		ax.scatter(original_ago, original_scores, color='red')
 		mp = {ago: score for ago, score in zip(original_ago, original_scores)}
 
-	for k in reversed(range(len(days))):
-		if (now - days[k][1]).total_seconds() > 24 * 60 * 60 * (args.maxage + 0.5):
-			remove(days, k, args.directory)
+	for k in reversed(range(len(backups))):
+		if (now - backups[k][1]).total_seconds() > 24 * 60 * 60 * (args.maxage + 0.5):
+			remove(backups, k, args.directory, is_removed)
 
-	while len(days) > args.keep:
-		ago, scores = get_scores(days, now)
+	while len(backups) > args.keep:
+		ago, scores = get_scores(backups, now)
 		topk, topscore = get_top(scores)
-		remove(days, topk, args.directory)
+		remove(backups, topk, args.directory, is_removed)
+
+	print('keep name')
+	for backup, status in is_removed.items():
+		print('  {1:2s} {0:20s}'.format(backup[1].strftime('%Y-%m-%d %H:%M'), '' if status else '>>'))
 
 	if fig and ax and mp:
 		from matplotlib.pyplot import show
-		ago = get_scores(days, now)[0]
+		ago = get_scores(backups, now)[0]
 		ax.scatter(ago, tuple(mp[a] for a in ago), color='blue')
 		ax.set_ylim([min(mp.values()), max(mp.values())])
 		show()
