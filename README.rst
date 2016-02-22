@@ -52,6 +52,11 @@ Logging
 
 For logging, the code calls the functions defined in `conf_logging.sh`. You can add any callbacks, emails, logfiles etc there. Backups only help if they're actually made, so it is recommended that you use some way to check regularly.
 
+Remove old backups
+-------------------------------
+
+You can use ``cleanup.py`` to remove old backups. Use ``--keep X`` to keep ``X`` backups and remove the rest, ``--maxage 45`` to remove all backups more than 45 days old, ``--dry --plot`` to show what would have been deleted (without deleting anything) and ``-help`` for more information.
+
 Git
 -------------------------------
 
