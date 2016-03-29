@@ -103,7 +103,7 @@ function do_pax_sync_all()
 			printf 'symlinked "%s" from "%s" to "%s"\n' $currentdirname $latest_backup $new_location ||
 				{ log_failure "could not recursively symlink directories with pax: $latest_backup/$currentdirname -> $new_location/$currentdirname"; return 7; }
 		else
-			log_info "new item added to backup: $currentdirname"
+			log_info "new item added to backup: $currentdirname (not found in $latest_backup)"
 		fi
 	done
 	rm -rf .tmp
@@ -141,7 +141,8 @@ function do_pax_sync_all()
 		printf 'excluding %d files from "%s" (see "%s")\n' "$(cat $exclude_file | wc -l)" "$dir_path" "$exclude_file"
 		# sync this with the target directory, incl. delete
 		printf 'copying changed files from "%s"\n' "$source_dir"
-		rsync --rsync-path="ionice -c 3 nice -n 15 rsync" -arzphH $syncflags --delete --checksum --verbose --exclude-from="$exclude_file" $source_dir $new_location &&
+		#rsync --rsync-path="ionice -c 3 nice -n 15 rsync" -arzphH $syncflags --delete --checksum --verbose --exclude-from="$exclude_file" $source_dir $new_location &&
+		rsync --rsync-path="ionice -c 3 nice -n 15 rsync" -arzphH $syncflags --delete --checksum --exclude-from="$exclude_file" $source_dir $new_location &&
 		printf '"%s" now contains a clone of "%s"\n\n' $new_location $source_dir ||
 			{ log_failure "could not sync directories: $source_dir -> $new_location"; return 8; }
 	done
