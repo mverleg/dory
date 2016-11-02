@@ -19,6 +19,7 @@ Other features:
 
 * If your machine is compromised, the attacker cannot access backups.
 * Lists unreadable files, then skips them gracefully.
+* Directories with a `.nobackup` file are ignored.
 * Easy to add logging hooks on success, failure, etc.
 * Makes log entry about changes & available space.
 * If a backup stops halfway, half the files are secure, and running again only only does the other half.
