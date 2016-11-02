@@ -20,8 +20,20 @@ function find_exclude_paths ()
 	if $skip_hidden_dirs
 	then
 		# find all the hidden directories; get both directory and directory/*
-		find "$dir_path" -type d -name '.*' 2> /dev/null | sed -e 's/\(.*\)$/\1\n\1\/*/'
+		find -L "$dir_path" -type d -name '.*' 2> /dev/null | sed -e 's/\(.*\)$/\1\n\1\/*/'
 	fi
+}
+
+function find_ignore_paths ()
+{
+    #
+    # Find directories that have a '.nobackup' file.
+    #
+    # Argument: $1 or $dir_path: directory to check for files to skip.
+	# Prints the paths that are to be skipped
+	#
+    if [ -n "$1" ]; then dir_path="$1"; fi
+	find -L "$dir_path" -type f -name '.nobackup' | xargs dirname
 }
 
 function do_pax_sync_all()
@@ -114,7 +126,7 @@ function do_pax_sync_all()
 		# set up some initial values
 		source_dir=${source_dir%/}
 		syncflags=""
-		exclude_file=$(mktemp).ignore
+		exclude_file=$(mktemp).ignore.abs
 		printf "__pycache__\n*.pyc\n*~\n" > "$exclude_file"  # some initial value so it's created
 		if [[ $source_dir == *":"* ]]
 		then
@@ -123,25 +135,23 @@ function do_pax_sync_all()
 			dir_path="$(echo $source_dir | sed 's/.*\://')"
 			printf 'finding unreadable files to exclude from "%s" on "%s"\n' "$dir_path" "$server_name"
 			ssh "$server_name" "$(typeset -f find_exclude_paths); find_exclude_paths \"$dir_path\" $skip_hidden_dirs" >> "$exclude_file"
+			printf 'finding ignored directories from "%s" on "%s"\n' "$dir_path" "$server_name"
+			ssh "$server_name" "$(typeset -f find_ignore_paths);  find_ignore_paths  \"$dir_path\"" >> "$exclude_file"
 			syncflags="$syncflags -e ssh"
 		else
 			# find excluded files for local directory
 			dir_path="$source_dir"
 			printf 'finding unreadable files to exclude from "%s" locally\n' "$dir_path"
 			find_exclude_paths "$dir_path" $skip_hidden_dirs >> "$exclude_file"
+			printf 'finding ignored directories from "%s" locally\n' "$dir_path"
+            find_ignore_paths "$dir_path" >> "$exclude_file"
 		fi
 		# make paths relative or it doesn't work
-		make_path_relative "$(cat $exclude_file)" "$dir_path" >> "$exclude_file"
-#		while read line
-#		do
-#		    make_path_relative "$line" "$dir_path" >> "$exclude_file.rel"
-#
-#		done < "$exclude_file"
-		#exclude_file="$exclude_file.rel"
+		make_path_relative "$(cat $exclude_file)" "$dir_path" > "${exclude_file::-4}.rel"
+		exclude_file="${exclude_file::-4}.rel"
 		printf 'excluding %d files from "%s" (see "%s")\n' "$(cat $exclude_file | wc -l)" "$dir_path" "$exclude_file"
 		# sync this with the target directory, incl. delete
 		printf 'copying changed files from "%s"\n' "$source_dir"
-		#rsync --rsync-path="ionice -c 3 nice -n 15 rsync" -arzphH $syncflags --delete --checksum --verbose --exclude-from="$exclude_file" $source_dir $new_location &&
 		rsync --rsync-path="ionice -c 3 nice -n 15 rsync" -arzphH $syncflags --delete --checksum --exclude-from="$exclude_file" $source_dir $new_location &&
 		printf '"%s" now contains a clone of "%s"\n\n' $new_location $source_dir ||
 			{ log_failure "could not sync directories: $source_dir -> $new_location"; return 8; }
