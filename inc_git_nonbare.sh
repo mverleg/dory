@@ -8,17 +8,20 @@ function get_bare_git_repos ()
 	# Get all bare git repositories in directory $1 (only direct descendants).
 	#
 	# $1 is the directory and $2 can optionally be the ssh server
+	# $3 can be the maximum depth, which defaults to 1
 	# Sets $repos
 	#
+	depth="1"
 	if [ -n "$1" ]; then repos_dir="$1"; fi
 	if [ -n "$2" ]; then server="$2"; fi
+	if [ -n "$3" ]; then depth="$3"; fi
 	if [ -z "$repos_dir" ]; then log_failure "no directory given to get_git_repos to check for repos"; return 1; fi
 	if ! which git 1> /dev/null ; then log_failure "git not installed! aborting"; return 1; fi
 	if [ -n "$server" ]
 	then
-		repos=$(ssh "$server" find "$repos_dir" -type d -name 'objects' -maxdepth 2)
+		repos=$(ssh "$server" find "$repos_dir" -type d -name 'objects' -maxdepth $((depth + 1)))
 	else
-		repos=$(find "$repos_dir" -type d -name 'objects' -maxdepth 2)
+		repos=$(find "$repos_dir" -type d -name 'objects' -maxdepth $((depth + 1)))
 		server="local"
 	fi
 	_repos="$(make_path_relative "$repos" "$repos_dir" | sed 's/\(.*\)\/objects/\1/')"

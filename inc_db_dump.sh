@@ -170,19 +170,40 @@ function dump_all_dbs ()
 	dump_all_postgres
 }
 
-function remote_dump_all_dbs ()
+function remote_run_dump_func ()
 {
 	#
-	# Dump all dbs on a remote ssh machine $1 in directory $2.
+	# Remotely run dump function $1 on machine $1 with output in directory $2.
 	#
-	if [ -z "$1" ]; then log_failure "provide a remote machine for remote_dump_all_dbs"; fi
-	if [ -z "$2" ]; then log_failure "provide a (remote) directory for remote_dump_all_dbs"; fi
+	if [ -z "$1" ]; then log_failure ""; fi
+	if [ -z "$2" ]; then log_failure "provide a remote machine for remote_dump_all_dbs"; fi
+	if [ -z "$3" ]; then log_failure "provide a (remote) directory for remote_dump_all_dbs"; fi
 	code="$(typeset -f dump_all_dbs dump_all_postgres dump_all_mysql handle_raw_db_dump do_postgres_dump do_mysql_dump get_postgres_databases get_mysql_databases dummy_logs)"
 	#ssh "$1" "$code; mkdir -p \"$2\"; cd \"$2\"; pwd; dummy_logs; dump_all_dbs" 2>&1 | (
 	#    read err ; if [ -n "$err" ]; then log_warning "$err"; fi ) | (
 	#    read out ; if [ -n "$out" ]; then log_info    "$out"; fi )
-	ssh "$1" "$code; mkdir -p \"$2\"; cd \"$2\"; dummy_logs; dump_all_dbs" 1> /tmp/remote_dump.out 2> /tmp/remote_dump.err
+	ssh "$2" "$code; mkdir -p \"$3\"; cd \"$3\"; dummy_logs; $1" 1> /tmp/remote_dump.out 2> /tmp/remote_dump.err
     if [ -n "$(cat /tmp/remote_dump.out)" ]; then log_info "remote dump:\n$(cat /tmp/remote_dump.out)"; fi
     if [ -n "$(cat /tmp/remote_dump.err)" ]; then log_failure "remote dump:\n$(cat /tmp/remote_dump.err)"; fi
 }
+
+function remote_dump_all_dbs ()
+{
+    #
+    # Dump all dbs on a remote ssh machine $1 in directory $2.
+    #
+	remote_run_dump_func "dump_all_dbs" "$1" "$2"
+}
+
+function remote_dump_mysql ()
+{
+	remote_run_dump_func "dump_all_mysql" "$1" "$2"
+}
+
+function remote_dump_postgres ()
+{
+	remote_run_dump_func "dump_all_postgres" "$1" "$2"
+}
+
+
 
