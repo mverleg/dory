@@ -44,7 +44,6 @@ function pull_clone_one_repo ()
 	if [ -n "$1" ]; then repo="$1"; fi
 	if [ -n "$2" ]; then repos_dir="$2"; fi
 	if [ -n "$3" ]; then server="$3"; fi
-	echo "pwd = $(pwd) | repo = $repo"  # todo tmp
     if [ -e "$repo" ]
     then
         if [ -e "$repo/.git" ]
@@ -124,8 +123,6 @@ function remote_find_and_clone ()
 	    repo_name="$(basename ${repo_pth%.git})"
 	    source_dir="${source_root}/$(dirname $repo_pth)"
 	    target_dir="${target_root}/$(dirname $repo_pth)"
-	    echo "repo_pth = $repo_pth | source_root = $source_root | target_root = $target_root | target_dir = $target_dir"  # todo
-		# pull_clone_one_repo "$repo" "$repos_dir" "$server"
 		ssh "$server" "$code; dummy_logs; mkdir -p \"$target_dir\"; cd \"$target_dir\"; pull_clone_one_repo \"$repo_name\" \"$source_dir\" \"\"" \
 		    1> /tmp/remote_dump.out 2> /tmp/remote_dump.err
         if grep failed "/tmp/remote_dump.err" 1> /dev/null
