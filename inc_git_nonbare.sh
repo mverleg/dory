@@ -105,15 +105,17 @@ function remote_find_and_clone ()
 	# Arguments: $1 host, $2 source dir, $3 target dir
 	# Silently assumes logging functions are defined.
 	#
+	depth="-1"
 	if [ -n "$1" ]; then server="$1"; fi
 	if [ "$1" == "." ]; then server=""; fi
 	if [ -n "$2" ]; then source_root="$2"; fi
 	if [ -n "$3" ]; then target_root="$3"; fi
+	if [ -n "$4" ]; then depth="$4"; fi
 	if [ -z "$1" ]; then log_failure "provide a remote machine for remote_find_and_clone"; return; fi
 	if [ -z "$2" ]; then log_failure "provide a (remote) source directory for remote_find_and_clone"; return; fi
 	if [ -z "$3" ]; then log_failure "provide a (remote) target directory for remote_find_and_clone"; return; fi
 	code="$(typeset -f pull_clone_one_repo make_path_relative dummy_logs)"
-	repos="$(get_bare_git_repos $source_root $server -1)"
+	repos="$(get_bare_git_repos $source_root $server $depth)"
 	printf "repos found: $(echo $repos)\n"
 	printf "pulling/cloning from $server:$source_root to $server:$target_root\n"
 	total=0 #; for repo in $repos; do ((total+=1)); done
@@ -127,9 +129,10 @@ function remote_find_and_clone ()
 		    1> /tmp/remote_dump.out 2> /tmp/remote_dump.err
         if grep failed "/tmp/remote_dump.err" 1> /dev/null
         then
+			# log_failure "remote pullclone errors for $repo_pth: $(cat /tmp/remote_dump.err)"
 			log_failure "remote pullclone errors for $repo_pth: $(cat /tmp/remote_dump.err)"
 		else
-			printf "remote pullclone output & errors for $repo_pth:\n$(cat /tmp/remote_dump.out)\n$(cat /tmp/remote_dump.err)\n"
+			printf "remote pullclone output & errors for %s:\n%s\n%s\n" "$repo_pth" "$(cat /tmp/remote_dump.out)" "$(cat /tmp/remote_dump.err)"
 			((success+=1))
 		fi
 		((total+=1))
