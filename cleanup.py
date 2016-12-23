@@ -74,7 +74,7 @@ def prune(args):
 		backups = [(None, now - timedelta(days=int((0.03 * randint(0, int(100)))**4), seconds=randint(0, 86400))) for k in range(args.demo)]
 	else:
 		backups = list(find_backups(args.directory, args.dry))
-	is_removed = OrderedDict((backup, False) for backup in sorted(backups))
+	is_removed = OrderedDict((backup, False) for backup in sorted(backups, key=lambda obj: obj[1]))
 
 	fig = ax = mp = None
 	if args.plot:

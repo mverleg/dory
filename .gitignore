@@ -14,3 +14,7 @@
 !LICENSE.txt
 !README.rst
 !.gitignore
+!cleanup.py
+!git_backup.sh
+!mysql_dump.sh
+!pax_backup.sh
