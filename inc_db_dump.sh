@@ -19,7 +19,7 @@ function get_mysql_databases ()
 	mysql_databases=""
 	if [ ! $(which mysql) ]; then log_failure "mysql not found"; return 1; fi
 	if [ -n "$(echo 'exit' | mysql 2>&1)" ]; then log_failure "failed to connect to mysql server; make sure you have ~/.my.conf set up correctly"; return 1; fi
-	mysql_databases="$(echo "show databases;" | mysql | grep -v -e '_schema$' | grep -Ev 'Database|extra_options|mysql')"
+	mysql_databases="$(echo "show databases;" | mysql | grep -v -e '_schema$' | grep -Ev 'Database|extra_options|mysql|phpmyadmin|sys')"
 	printf "found MySQL tables: %s\n" "$(echo $mysql_databases)"
 }
 
